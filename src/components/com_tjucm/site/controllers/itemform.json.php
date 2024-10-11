@@ -131,20 +131,6 @@ class TjucmControllerItemForm extends FormController
 			
 			Factory::getApplication()->triggerEvent('tjUcmOnBeforeSaveItem', array($data, $isNew));
 
-			if ($isNew)
-			{
-				$data['checked_out'] = 0;
-			    $data['modified_by'] = 0;
-   			    $data['modified_date'] = '0000-00-00 00:00:00';
-
-			}
-			else
-			{
-				$data['checked_out'] = Factory::getUser()->id;
-			    $data['modified_by'] = Factory::getUser()->id;
-			    $data['modified_date'] = new Date('now');
-			}
-
 			if ($model->save($data))
 			{
 				$result['id'] = $model->getState($model->getName() . '.id');
