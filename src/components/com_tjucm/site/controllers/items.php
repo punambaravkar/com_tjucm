@@ -495,10 +495,6 @@ class TjucmControllerItems extends TjucmController
             // Read and output the file content
             readfile($logFilePath);
             exit;
-        } else {
-            // If file not found, set an error message
-            Factory::getApplication()->enqueueMessage('Log file not found.', 'error');
-            $this->setRedirect('index.php?option=com_yourcomponent');
         }
     }	
 	
