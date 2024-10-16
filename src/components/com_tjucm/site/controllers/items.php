@@ -126,24 +126,23 @@ class TjucmControllerItems extends TjucmController
 			$fieldsArray[$field->name] = $field;
 		}
 
-		// Logs implemetation
-		header('Cache-Control: no-cache, must-revalidate');
-		header('Content-type: application/json');
+			header('Cache-Control: no-cache, must-revalidate');
+			header('Content-type: application/json');
 
-		// Format the date for the log file name
-		$date = Factory::getDate()->format('Y-m-d_H-i-s');
-		$logFileName = 'com_tjucm.import_records_' . $date . '.log.php'; // Ensuring valid filename
+			// Format the date for the log file name
+			$date = Factory::getDate()->format('Y-m-d_H-i-s');
+			$logFileName = 'com_tjucm.import_records_' . $date . '.log.php'; // Ensuring valid filename
 
-		// Register the logger with a valid log file name
-		Log::addLogger(
-			array('text_file' => $logFileName), 
-			Log::ALL, 
-			array('com_tjucm')
-		);
+			// Register the logger with a valid log file name
+			Log::addLogger(
+				array('text_file' => $logFileName), 
+				Log::ALL, 
+				array('com_tjucm')
+			);
 
-		// Set log file name to session
-		$session     = Factory::getSession();
-		$session->set('import_filename', $logFileName);
+			// Set log file name to session
+			$session     = Factory::getSession();
+			$session->set('import_filename', $logFileName);
 
 		// Read the CSV file
 		$file = fopen($uploadPath, 'r');
@@ -462,7 +461,6 @@ class TjucmControllerItems extends TjucmController
 		}
 	}
 
-
 	/**
 	 * Method to download log file
 	 *
@@ -472,30 +470,41 @@ class TjucmControllerItems extends TjucmController
 	 */
    public function downloadLog()
     {
+        // Get the file name from the request
         $logFileName = Factory::getApplication()->input->getString('file');
+		$safeFileName = basename($logFileName);
 
         // Full path to the log file
-        $logFilePath = JPATH_ADMINISTRATOR . '/logs/' . $logFileName;
+        $logFilePath = JPATH_ADMINISTRATOR . '/logs/' . $safeFileName;
+		$fullPath = realpath($baseDir . $safeFileName);
+
+		// Validate: Ensure the path is within the intended directory
+		if (strpos($fullPath, $baseDir) !== 0 || !$fullPath) 
+		{
+			JError::raiseWarning(404, JText::_('JERROR_ALERTNOAUTHOR'));
+			return false;
+		}
+
 
         // Check if the file exists
-        if (file_exists($logFilePath)) {
+        if (file_exists($fullPath)) 
+        {
             // Set headers for file download
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
-            header('Content-Disposition: attachment; filename="' . basename($logFilePath) . '"');
+            header('Content-Disposition: attachment; filename="' . $safeFileName . '"');
             header('Expires: 0');
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($logFilePath));
+            header('Content-Length: ' . filesize($fullPath));
 
             // Clear output buffer
             ob_clean();
             flush();
 
             // Read and output the file content
-            readfile($logFilePath);
+            readfile($fullPath);
             exit;
-        }
-    }	
-	
+		}
+	}	
 }
