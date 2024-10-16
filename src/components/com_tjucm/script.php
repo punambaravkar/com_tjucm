@@ -32,7 +32,7 @@ class Com_TjucmInstallerScript
 		$jversion = new JVersion;
 
 		// Installing component manifest file version
-		$manifest = $parent->get("manifest");
+		$manifest = $parent->getManifest();
 		$release  = (string) $manifest['version'];
 
 		// Abort if the component wasn't build for the current Joomla version
